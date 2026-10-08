@@ -1,0 +1,90 @@
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+
+# 1. Create a small dataset
+data = {
+    "text": [
+        "Government announces new education policy",
+        "Scientists discover a new planet",
+        "New technology improves medical treatment",
+        "President visits the country for official meeting",
+        "Weather department predicts heavy rainfall",
+        "Scientists confirm water on another planet",
+        "Aliens have landed in our city",
+        "Drinking a special juice makes you live forever",
+        "Government will give everyone one crore rupees",
+        "Celebrity claims humans can live without food"
+    ],
+
+    "label": [
+        "REAL",
+        "REAL",
+        "REAL",
+        "REAL",
+        "REAL",
+        "REAL",
+        "FAKE",
+        "FAKE",
+        "FAKE",
+        "FAKE"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+print(df)
+
+
+# 2. Separate text and labels
+X = df["text"]
+y = df["label"]
+
+
+# 3. Split data into training and testing
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+
+# 4. Convert text into numbers using TF-IDF
+vectorizer = TfidfVectorizer()
+
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+
+
+# 5. Create the machine learning model
+model = LogisticRegression()
+
+model.fit(X_train_tfidf, y_train)
+
+
+# 6. Make predictions
+y_pred = model.predict(X_test_tfidf)
+
+
+# 7. Check accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+
+
+# 8. Show classification report
+print(classification_report(y_test, y_pred))
+
+
+# 9. Test a new news article
+new_news = [
+    "Scientists discover a new planet near Earth"
+]
+
+new_news_tfidf = vectorizer.transform(new_news)
+
+prediction = model.predict(new_news_tfidf)
+
+print("Prediction:", prediction[0])
