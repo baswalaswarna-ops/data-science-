@@ -1,0 +1,93 @@
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+
+# 1. Create sample customer data
+data = {
+    "Age": [22, 35, 45, 28, 50, 31, 40, 25, 52, 33],
+    "MonthlyCharges": [30, 70, 90, 40, 100, 65, 85, 35, 110, 55],
+    "Tenure": [2, 24, 36, 5, 48, 18, 30, 3, 60, 12],
+    "Contract": [
+        "Monthly", "Yearly", "Yearly", "Monthly", "Yearly",
+        "Monthly", "Yearly", "Monthly", "Yearly", "Monthly"
+    ],
+    "Churn": [
+        "Yes", "No", "No", "Yes", "No",
+        "No", "No", "Yes", "No", "Yes"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+print("Customer Data:")
+print(df)
+
+
+# 2. Convert text values into numbers
+encoder = LabelEncoder()
+
+df["Contract"] = encoder.fit_transform(df["Contract"])
+df["Churn"] = encoder.fit_transform(df["Churn"])
+
+
+# 3. Select features and target
+X = df[["Age", "MonthlyCharges", "Tenure", "Contract"]]
+y = df["Churn"]
+
+
+# 4. Split data into training and testing
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.3,
+    random_state=42
+)
+
+
+# 5. Create the machine learning model
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+
+# 6. Train the model
+model.fit(X_train, y_train)
+
+
+# 7. Make predictions
+y_pred = model.predict(X_test)
+
+
+# 8. Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+print("\nAccuracy:", accuracy)
+
+
+# 9. Classification report
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+
+# 10. Predict churn for a new customer
+new_customer = pd.DataFrame({
+    "Age": [29],
+    "MonthlyCharges": [75],
+    "Tenure": [6],
+    "Contract": ["Monthly"]
+})
+
+new_customer["Contract"] = encoder.transform(
+    new_customer["Contract"]
+)
+
+prediction = model.predict(new_customer)
+
+if prediction[0] == 1:
+    print("\nPrediction: Customer is likely to CHURN")
+else:
+    print("\nPrediction: Customer is likely to STAY")
